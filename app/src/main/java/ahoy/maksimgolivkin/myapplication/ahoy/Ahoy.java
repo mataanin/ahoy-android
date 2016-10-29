@@ -18,12 +18,11 @@ import ahoy.maksimgolivkin.myapplication.ahoy.utils.ActivityCounter.LastActivity
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 public class Ahoy {
 
-    private static final String TAG = "ahoy-manager";
+    private static final String TAG = "ahoy";
 
     private ActivityCounter activityCounter = new ActivityCounter();
     private CompositeSubscription compositeSubscription = new CompositeSubscription();
@@ -72,24 +71,37 @@ public class Ahoy {
     }
 
     private void reset(final Map<String, Object> extraParameters) {
-        compositeSubscription.add(delegate.newVisit(visitorToken)
-                .subscribeOn(Schedulers.io())
+        VisitCallbackOnSubscribe visitCallbackOnSubscribe = new VisitCallbackOnSubscribe();
+
+        compositeSubscription.add(
+                Observable.create(visitCallbackOnSubscribe)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Visit>() {
                     @Override public void call(Visit visit) {
                         Ahoy.this.visit = visit;
-                        Log.d(TAG, "received visit " + visit.visitToken());
+                        Log.d(TAG, "new visit " + visit.visitToken());
                         storage.setVisit(visit);
-                        delegate.registerVisit(visitorToken, visit, extraParameters);
                         scheduleReset(visit.expiresAt());
                         fireVisitUpdatedEvent();
                     }
+                }, new Action1<Throwable>() {
+                    @Override public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                        Log.d(TAG, "failed registering a visit " + visit.visitToken());
+                    }
                 }));
+
+        VisitParams params = VisitParams.create(visitorToken, null, extraParameters);
+        delegate.newVisit(params, visitCallbackOnSubscribe);
     }
 
     private void fireVisitUpdatedEvent() {
         for (VisitListener listener : visitListeners) {
-            listener.onVisitUpdated(visit);
+            try {
+                listener.onVisitUpdated(visit);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

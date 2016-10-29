@@ -13,13 +13,14 @@ import java.util.concurrent.TimeUnit;
 import ahoy.maksimgolivkin.myapplication.ahoy.AhoyDelegate;
 import ahoy.maksimgolivkin.myapplication.ahoy.Visit;
 import ahoy.maksimgolivkin.myapplication.ahoy.VisitConsts;
+import ahoy.maksimgolivkin.myapplication.ahoy.VisitParams;
+import ahoy.maksimgolivkin.myapplication.ahoy.utils.TypeUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
-import rx.Observable;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
@@ -59,25 +60,32 @@ public class Retrofit2Delegate implements AhoyDelegate {
         return randomUUID().toString();
     }
 
-    @Override public Observable<Visit> newVisit(String visitorToken) {
+    @Override public void newVisit(VisitParams visitParams, Callback callback) {
         String visitToken = UUID.randomUUID().toString();
         Visit visit = Visit.create(visitToken, System.currentTimeMillis() + VISIT_DURATION);
-        return Observable.just(visit);
+        callback.onSuccess(visit);
     }
 
-    @Override public void registerVisit(final String visitorToken, final Visit visit, Map<String, Object> extraParams) {
+    @Override public void updateVisit(final VisitParams visitParams, Callback callback) {
+        final String visitToken = visitParams.visitToken();
+        final String visitorToken = visitParams.visitorToken();
+
+        if (TypeUtil.isEmpty(visitToken) || TypeUtil.isEmpty(visitorToken)) {
+            throw new IllegalArgumentException("Please provide visit & visitor token");
+        }
+
         Map<String, Object> request = new HashMap<>();
         request.put(VisitConsts.OS, VisitConsts.OS_ANDROID);
-        request.put(VisitConsts.VISIT_TOKEN, visit.visitToken());
+        request.put(VisitConsts.VISIT_TOKEN, visitToken);
         request.put(VisitConsts.VISITOR_TOKEN, visitorToken);
-        request.putAll(extraParams);
+        request.putAll(visitParams.extraParams());
 
         api.registerVisit(request)
                 .compose(RxBackoff.<VisitResponse>backoff())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Action1<VisitResponse>() {
             @Override public void call(VisitResponse visitResponse) {
-                    Log.d(TAG, String.format("registered visitor %s visit %s", visitorToken, visit.visitToken()));
+                    Log.d(TAG, String.format("registered visitor %s visit %s", visitorToken, visitToken));
                 }
             }, new Action1<Throwable>() {
                 @Override public void call(Throwable throwable) {
@@ -87,12 +95,5 @@ public class Retrofit2Delegate implements AhoyDelegate {
                     Log.d(TAG, String.format("failed registering visitor %s, reason:", visitorToken, message));
                 }
             });
-    }
-
-    @Override public void updateVisit(String visitorToken, Visit visit, Map<String, Object> additionalParams) {
-
-
-
-
     }
 }

@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import java.util.Map;
 
 import ahoy.maksimgolivkin.myapplication.ahoy.Ahoy.VisitListener;
+import rx.Observable;
 
 public class AhoySingleton {
 
@@ -33,5 +34,9 @@ public class AhoySingleton {
 
     public static void resetVisit(Map<String, Object> extraParams) {
         sInstance.resetVisit(extraParams);
+    }
+
+    public static Observable<Visit> visitStream() {
+        return RxAhoy.stream(sInstance);
     }
 }

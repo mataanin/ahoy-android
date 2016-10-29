@@ -1,13 +1,14 @@
 package ahoy.maksimgolivkin.myapplication.ahoy;
 
-import java.util.Map;
-
-import rx.Observable;
-
 public interface AhoyDelegate {
 
+    interface Callback {
+        void onSuccess(Visit visit);
+        void onFailure(Throwable throwable);
+    }
+
     String newVisitorToken();
-    Observable<Visit> newVisit(String visitorToken);
-    void registerVisit(String visitorToken, Visit visit, Map<String, Object> additionalParams);
-    void updateVisit(String visitorToken, Visit visit, Map<String, Object> additionalParams);
+    void newVisit(VisitParams params, Callback callback);
+    void updateVisit(VisitParams params, Callback callback);
 }
+

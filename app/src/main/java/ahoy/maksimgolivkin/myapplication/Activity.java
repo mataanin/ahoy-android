@@ -9,18 +9,21 @@ import android.widget.TextView;
 
 import java.util.Collections;
 
-import ahoy.maksimgolivkin.myapplication.ahoy.Ahoy.VisitListener;
 import ahoy.maksimgolivkin.myapplication.ahoy.AhoySingleton;
 import ahoy.maksimgolivkin.myapplication.ahoy.Visit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx.Subscription;
+import rx.functions.Action1;
 
-public class Activity extends AppCompatActivity implements VisitListener {
+public class Activity extends AppCompatActivity {
 
     @BindView(R.id.visit_fetch_progress) ProgressBar visitFetchProgress;
     @BindView(R.id.visit_token) TextView visitTokenView;
     @BindView(R.id.visitor_token) TextView visitorTokenView;
+
+    private Subscription mSubscription;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,16 +32,20 @@ public class Activity extends AppCompatActivity implements VisitListener {
         ButterKnife.bind(this);
 
         updateViews(AhoySingleton.getVisitorToken(), AhoySingleton.getVisit());
-        AhoySingleton.addVisitListener(this);
     }
 
-    @Override protected void onDestroy() {
-        super.onDestroy();
-        AhoySingleton.removeVisitListener(this);
+    @Override protected void onResume() {
+        super.onResume();
+        mSubscription = AhoySingleton.visitStream().subscribe(new Action1<Visit>() {
+            @Override public void call(Visit visit) {
+                updateViews(AhoySingleton.getVisitorToken(), visit);
+            }
+        });
     }
 
-    @Override public void onVisitUpdated(Visit visit) {
-        updateViews(AhoySingleton.getVisitorToken(), visit);
+    @Override protected void onPause() {
+        super.onPause();
+        mSubscription.unsubscribe();
     }
 
     @OnClick({R.id.reset_button, R.id.next_activity_button})
