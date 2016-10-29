@@ -1,9 +1,9 @@
-package ahoy.maksimgolivkin.myapplication.ahoy;
+package com.github.instacart.ahoy;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ahoy.maksimgolivkin.myapplication.ahoy.AhoyDelegate.Callback;
+import com.github.instacart.ahoy.AhoyDelegate.Callback;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
 import rx.functions.Action0;

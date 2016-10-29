@@ -2,8 +2,8 @@ package ahoy.maksimgolivkin.myapplication;
 
 import android.app.Application;
 
-import ahoy.maksimgolivkin.myapplication.ahoy.AhoySingleton;
-import ahoy.maksimgolivkin.myapplication.ahoy.retrofit2.Retrofit2Delegate;
+import com.github.instacart.ahoy.AhoySingleton;
+import com.github.instacart.ahoy.retrofit2.Retrofit2Delegate;
 
 public class App extends Application {
 

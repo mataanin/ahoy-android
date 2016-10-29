@@ -7,10 +7,11 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.github.instacart.ahoy.AhoySingleton;
+import com.github.instacart.ahoy.Visit;
+
 import java.util.Collections;
 
-import ahoy.maksimgolivkin.myapplication.ahoy.AhoySingleton;
-import ahoy.maksimgolivkin.myapplication.ahoy.Visit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

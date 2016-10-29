@@ -1,4 +1,4 @@
-package ahoy.maksimgolivkin.myapplication.ahoy.utils;
+package com.github.instacart.ahoy.utils;
 
 import android.app.Activity;
 

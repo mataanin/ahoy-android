@@ -1,4 +1,4 @@
-package ahoy.maksimgolivkin.myapplication.ahoy;
+package com.github.instacart.ahoy;
 
 import com.google.auto.value.AutoValue;
 
@@ -11,4 +11,8 @@ public abstract class Visit {
 
     public abstract String visitToken();
     public abstract long expiresAt();
+
+    public boolean isValid() {
+        return System.currentTimeMillis() < expiresAt();
+    }
 }

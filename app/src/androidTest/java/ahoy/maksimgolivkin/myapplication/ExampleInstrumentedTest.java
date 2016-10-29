@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() throws Exception {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
-        assertEquals("ahoy.maksimgolivkin.myapplication", appContext.getPackageName());
+        assertEquals("com.com.github.instacart.maksimgolivkin.myapplication", appContext.getPackageName());
     }
 }

@@ -1,4 +1,4 @@
-package ahoy.maksimgolivkin.myapplication.ahoy;
+package com.github.instacart.ahoy;
 
 public interface AhoyDelegate {
 

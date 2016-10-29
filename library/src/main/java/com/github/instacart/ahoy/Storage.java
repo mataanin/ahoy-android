@@ -1,13 +1,13 @@
-package ahoy.maksimgolivkin.myapplication.ahoy;
+package com.github.instacart.ahoy;
 
 import android.app.Application;
 import android.support.annotation.Nullable;
 
-import ahoy.maksimgolivkin.myapplication.ahoy.utils.SharedPreferencesWrapper;
+import com.github.instacart.ahoy.utils.SharedPreferencesWrapper;
 
 public class Storage {
 
-    private static final String AHOY_PREFERENCES_FILE = "ahoy.prefs";
+    private static final String AHOY_PREFERENCES_FILE = "com.com.github.instacart.prefs";
 
     private static final String VISIT_TOKEN = "visit token";
     private static final String VISITOR_TOKEN = "visitor token";

@@ -1,11 +1,12 @@
-package ahoy.maksimgolivkin.myapplication.ahoy;
+package com.github.instacart.ahoy;
 
 import android.app.Application;
 import android.support.annotation.Nullable;
 
+import com.github.instacart.ahoy.Ahoy.VisitListener;
+
 import java.util.Map;
 
-import ahoy.maksimgolivkin.myapplication.ahoy.Ahoy.VisitListener;
 import rx.Observable;
 
 public class AhoySingleton {

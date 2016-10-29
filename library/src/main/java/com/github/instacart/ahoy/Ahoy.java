@@ -1,4 +1,4 @@
-package ahoy.maksimgolivkin.myapplication.ahoy;
+package com.github.instacart.ahoy;
 
 import android.app.Activity;
 import android.app.Application;
@@ -6,15 +6,16 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.github.instacart.ahoy.utils.ActivityCounter;
+import com.github.instacart.ahoy.utils.ActivityCounter.FirstActivityStartedListener;
+import com.github.instacart.ahoy.utils.ActivityCounter.LastActivityStoppedListener;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import ahoy.maksimgolivkin.myapplication.ahoy.utils.ActivityCounter;
-import ahoy.maksimgolivkin.myapplication.ahoy.utils.ActivityCounter.FirstActivityStartedListener;
-import ahoy.maksimgolivkin.myapplication.ahoy.utils.ActivityCounter.LastActivityStoppedListener;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -30,6 +31,7 @@ public class Ahoy {
     private final AhoyDelegate delegate;
     private final Storage storage;
     private Visit visit;
+    private volatile boolean visitResetLock;
     private List<VisitListener> visitListeners = new ArrayList<>();
     private String visitorToken;
 
@@ -47,6 +49,7 @@ public class Ahoy {
         }
         activityCounter.addFistActivityStartedListener(new FirstActivityStartedListener() {
             @Override public void onFirstActivityStarted(Activity activity) {
+                visitResetLock = false;
                 scheduleReset(visit != null ? visit.expiresAt() : System.currentTimeMillis());
             }
         });
@@ -71,8 +74,13 @@ public class Ahoy {
     }
 
     private void reset(final Map<String, Object> extraParameters) {
-        VisitCallbackOnSubscribe visitCallbackOnSubscribe = new VisitCallbackOnSubscribe();
+        if (visitResetLock) {
+            return;
+        }
 
+        visitResetLock = true;
+
+        VisitCallbackOnSubscribe visitCallbackOnSubscribe = new VisitCallbackOnSubscribe();
         compositeSubscription.add(
                 Observable.create(visitCallbackOnSubscribe)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -81,13 +89,15 @@ public class Ahoy {
                         Ahoy.this.visit = visit;
                         Log.d(TAG, "new visit " + visit.visitToken());
                         storage.setVisit(visit);
-                        scheduleReset(visit.expiresAt());
+                        visitResetLock = false;
                         fireVisitUpdatedEvent();
+                        scheduleReset(visit.expiresAt());
                     }
                 }, new Action1<Throwable>() {
                     @Override public void call(Throwable throwable) {
                         throwable.printStackTrace();
                         Log.d(TAG, "failed registering a visit " + visit.visitToken());
+                        visitResetLock = false;
                     }
                 }));
 

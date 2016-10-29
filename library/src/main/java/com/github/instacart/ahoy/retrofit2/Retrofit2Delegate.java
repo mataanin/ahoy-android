@@ -1,4 +1,4 @@
-package ahoy.maksimgolivkin.myapplication.ahoy.retrofit2;
+package com.github.instacart.ahoy.retrofit2;
 
 import android.util.Log;
 
@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import ahoy.maksimgolivkin.myapplication.ahoy.AhoyDelegate;
-import ahoy.maksimgolivkin.myapplication.ahoy.Visit;
-import ahoy.maksimgolivkin.myapplication.ahoy.VisitConsts;
-import ahoy.maksimgolivkin.myapplication.ahoy.VisitParams;
-import ahoy.maksimgolivkin.myapplication.ahoy.utils.TypeUtil;
+import com.github.instacart.ahoy.AhoyDelegate;
+import com.github.instacart.ahoy.Visit;
+import com.github.instacart.ahoy.VisitConsts;
+import com.github.instacart.ahoy.VisitParams;
+import com.github.instacart.ahoy.utils.TypeUtil;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;

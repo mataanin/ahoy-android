@@ -1,4 +1,4 @@
-package ahoy.maksimgolivkin.myapplication.ahoy.retrofit2;
+package com.github.instacart.ahoy.retrofit2;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

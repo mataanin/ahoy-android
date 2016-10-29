@@ -9,18 +9,24 @@ buildscript {
     }
 }
 
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'com.neenbedankt.android-apt'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {url "https://clojars.org/repo/"}
+}
 
 android {
     compileSdkVersion 24
     buildToolsVersion "25.0.0"
+
     defaultConfig {
-        applicationId "com.com.github.instacart.maksimgolivkin.myapplication"
-        minSdkVersion 15
+        minSdkVersion 14
         targetSdkVersion 24
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -29,25 +35,28 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
 }
 
 dependencies {
-    compile project(path: ':library')
-
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:24.2.1'
     testCompile 'junit:junit:4.12'
 
-    compile 'com.jakewharton:butterknife:8.4.0'
-    apt 'com.jakewharton:butterknife-compiler:8.4.0'
+    compile 'com.android.support:support-annotations:25.0.0'
+
+    compile 'io.reactivex:rxandroid:1.1.0'
+
+    apt 'frankiesardo:auto-parcel:1.0.3'
+    provided 'frankiesardo:auto-parcel:1.0.3'
+
+    compile "com.squareup.okhttp3:logging-interceptor:3.4.1"
+    compile "com.squareup.retrofit2:adapter-rxjava:2.1.0"
+    compile "com.squareup.retrofit2:converter-jackson:2.1.0"
+    compile "com.squareup.retrofit2:retrofit:2.1.0"
 }
+
+group='com.github.instacart'
