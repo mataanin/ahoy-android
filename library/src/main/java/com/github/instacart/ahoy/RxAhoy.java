@@ -27,7 +27,6 @@ public class RxAhoy {
 
             if (subscribers.size() == 0) {
                 ahoy.addVisitListener(this);
-                return;
             }
 
             subscriber.add(Subscriptions.create(new Action0() {

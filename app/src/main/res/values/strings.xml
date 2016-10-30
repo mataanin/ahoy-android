@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Ahoy Premier</string>
+    <string name="next_activity">Next Activity</string>
+    <string name="next_utm_activity">Next Utm Activity</string>
+    <string name="new_visit">New visit</string>
+    <string name="new_visit_with_utm">New visit with UTM</string>
+    <string name="save_utm_params">Save UTM on ongoing visit</string>
+    <string name="simple_activity">Simple activity #%1$d</string>
+    <string name="visit_token">Visit token: %1$s</string>
+    <string name="utm_activity">UTM Activity #%1$d</string>
+    <string name="utm_campaign">Campaign %1$d</string>
+    <string name="utm_content">Content %1$d</string>
+    <string name="utm_medium">Medium %1$d</string>
+    <string name="utm_params">UTM Parameters</string>
+    <string name="utm_source">Source %1$d</string>
+    <string name="utm_term">Term %1$d</string>
 </resources>

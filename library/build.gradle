@@ -48,8 +48,6 @@ dependencies {
 
     compile 'com.android.support:support-annotations:25.0.0'
 
-    compile 'io.reactivex:rxandroid:1.1.0'
-
     apt 'frankiesardo:auto-parcel:1.0.3'
     provided 'frankiesardo:auto-parcel:1.0.3'
 

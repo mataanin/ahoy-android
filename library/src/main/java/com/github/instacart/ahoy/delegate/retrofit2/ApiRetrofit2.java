@@ -1,4 +1,4 @@
-package com.github.instacart.ahoy.retrofit2;
+package com.github.instacart.ahoy.delegate.retrofit2;
 
 import java.util.Map;
 
