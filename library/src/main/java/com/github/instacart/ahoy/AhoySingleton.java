@@ -43,6 +43,6 @@ public class AhoySingleton {
     }
 
     public static void scheduleSaveExtras(Map<String, String> extraParams) {
-        sInstance.sheduleSaveExtras(extraParams);
+        sInstance.scheduleSaveExtras(extraParams);
     }
 }

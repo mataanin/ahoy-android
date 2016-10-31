@@ -244,7 +244,7 @@ public class Ahoy {
      *
      * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
      */
-    public void sheduleSaveExtras(@Nullable Map<String, String> extraParams) {
+    public void scheduleSaveExtras(@Nullable Map<String, String> extraParams) {
         storage.updatePendingExtraParams(extraParams);
         scheduleUpdate(System.currentTimeMillis());
     }
