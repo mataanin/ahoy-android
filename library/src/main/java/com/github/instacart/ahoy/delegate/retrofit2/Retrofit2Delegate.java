@@ -8,7 +8,7 @@ import com.github.instacart.ahoy.Visit;
 import com.github.instacart.ahoy.delegate.AhoyDelegate;
 import com.github.instacart.ahoy.delegate.VisitParams;
 import com.github.instacart.ahoy.utils.TypeUtil;
-import com.github.instacart.ahoy.utils.UtmParamsUtil;
+import com.github.instacart.ahoy.utils.UtmUtil;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,7 +63,7 @@ public class Retrofit2Delegate implements AhoyDelegate {
         request.put(Visit.VISITOR_TOKEN, visitParams.visitorToken());
         request.putAll(TypeUtil.ifNull(visitParams.extraParams(), Collections.<String, Object>emptyMap()));
 
-        Uri landingParams = UtmParamsUtil.utmUri(visitParams.extraParams());
+        Uri landingParams = UtmUtil.utmUri(visitParams.extraParams());
         if (landingParams != null && !TypeUtil.isEmpty(landingParams.toString())) {
             request.put(Visit.LANDING_PAGE, landingParams.toString());
         }

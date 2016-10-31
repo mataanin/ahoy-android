@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class UtmParamsUtil {
+public class UtmUtil {
 
     private static final String[] utmParams = {
             Visit.UTM_CAMPAIGN,
@@ -20,7 +20,7 @@ public class UtmParamsUtil {
             Visit.UTM_TERM
     };
 
-    private UtmParamsUtil() {
+    private UtmUtil() {
     }
 
     @Nullable public static Map<String, String> utmParams(@Nullable  Map<String, Object> params) {
@@ -45,7 +45,7 @@ public class UtmParamsUtil {
             return null;
         }
         Uri.Builder builder = new Uri.Builder();
-        Set<Entry<String, String>> utmParams = UtmParamsUtil.utmParams(params).entrySet();
+        Set<Entry<String, String>> utmParams = UtmUtil.utmParams(params).entrySet();
         for (Map.Entry<String, String> entry : utmParams) {
             builder = builder.appendQueryParameter(entry.getKey(), Uri.encode(entry.getValue()));
         }
