@@ -56,7 +56,7 @@ public class RxAhoy {
     private RxAhoy() {
     }
 
-    public static Observable<Visit> stream(Ahoy ahoy) {
+    public static Observable<Visit> visitStream(Ahoy ahoy) {
         return Observable.create(new VisitorListenerOnSubscribe(ahoy));
     }
 }

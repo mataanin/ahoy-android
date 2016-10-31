@@ -18,12 +18,12 @@ public class AhoySingleton {
         sInstance = new Ahoy(application, delegate, autoStart);
     }
 
-    @Nullable public static Visit getVisit() {
-        return sInstance.getVisit();
+    @Nullable public static Visit visit() {
+        return sInstance.visit();
     }
 
-    public static String getVisitorToken() {
-        return sInstance.getVisitorToken();
+    public static String visitorToken() {
+        return sInstance.visitorToken();
     }
 
     public static void addVisitListener(VisitListener listener) {
@@ -35,7 +35,7 @@ public class AhoySingleton {
     }
 
     public static Observable<Visit> visitStream() {
-        return RxAhoy.stream(sInstance);
+        return RxAhoy.visitStream(sInstance);
     }
 
     public static void scheduleNewVisit(Map<String, Object> extraParams) {

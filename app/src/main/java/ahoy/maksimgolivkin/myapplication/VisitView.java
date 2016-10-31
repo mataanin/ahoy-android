@@ -37,11 +37,11 @@ public class VisitView extends LinearLayout {
     @Override protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mSubscription = AhoySingleton.visitStream()
-                .startWith(AhoySingleton.getVisit())
+                .startWith(AhoySingleton.visit())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Visit>() {
                     @Override public void call(Visit visit) {
-                        updateViews(AhoySingleton.getVisitorToken(), visit);
+                        updateViews(AhoySingleton.visitorToken(), visit);
                     }
                 });
     }

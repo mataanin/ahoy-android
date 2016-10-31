@@ -213,11 +213,11 @@ public class Ahoy {
         }
     }
 
-    @NonNull public Visit getVisit() {
+    @NonNull public Visit visit() {
         return visit;
     }
 
-    public String getVisitorToken() {
+    public String visitorToken() {
         return visitorToken;
     }
 
