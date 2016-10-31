@@ -11,6 +11,8 @@ import com.github.instacart.ahoy.utils.TypeUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -28,14 +30,6 @@ import static java.util.UUID.randomUUID;
 public class Retrofit2Delegate implements AhoyDelegate {
 
     private static final long VISIT_DURATION = TimeUnit.MILLISECONDS.convert(15, TimeUnit.SECONDS);
-
-    private static final String[] utmParams = {
-            Visit.UTM_CAMPAIGN,
-            Visit.UTM_CONTENT,
-            Visit.UTM_MEDIUM,
-            Visit.UTM_SOURCE,
-            Visit.UTM_TERM
-    };
 
     private final ApiRetrofit2 api;
 
@@ -70,11 +64,9 @@ public class Retrofit2Delegate implements AhoyDelegate {
         request.putAll(visitParams.extraParams());
 
         Uri.Builder builder = new Uri.Builder();
-        for (String key : utmParams) {
-            Object value = visitParams.extraParams().get(key);
-            if (value instanceof CharSequence && !TypeUtil.isEmpty((CharSequence) value)) {
-                builder = builder.appendQueryParameter(key, Uri.encode(value.toString()));
-            }
+        Set<Entry<String, String>> utmParams = visitParams.utmParams().entrySet();
+        for (Map.Entry<String, String> entry : utmParams) {
+            builder = builder.appendQueryParameter(entry.getKey(), Uri.encode(entry.getValue()));
         }
 
         Uri landingParams = builder.build();
