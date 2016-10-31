@@ -49,12 +49,12 @@ public class Ahoy {
     private class UpdateAction implements Action0 {
 
         private boolean expireVisit;
-        private Map<String, String> newExtraParams;
+        private Map<String, Object> newExtraParams;
 
         public UpdateAction() {
         }
 
-        public UpdateAction(boolean epxireVisit, Map<String, String> newVisitExtraParams) {
+        public UpdateAction(boolean epxireVisit, Map<String, Object> newVisitExtraParams) {
             this.expireVisit = epxireVisit;
             this.newExtraParams = newVisitExtraParams;
         }
@@ -73,8 +73,8 @@ public class Ahoy {
                 saveVisit(visit != null ? visit.expire() : null);
                 storage.updatePendingExtraParams(newExtraParams);
             }
-
-            Map<String, String> extraParameters = storage.readPendingExtraParams(Collections.<String, String>emptyMap());
+            Map<String, Object> emptyMap = Collections.emptyMap();
+            Map<String, Object> extraParameters = storage.readPendingExtraParams(emptyMap);
             if (visit == null || !visit.isValid()) {
                 newVisit(extraParameters);
             } else if (!TypeUtil.isEmpty(extraParameters)){
@@ -157,7 +157,7 @@ public class Ahoy {
                         }));
     }
 
-    private void newVisit(final Map<String, String> extraParameters) {
+    private void newVisit(final Map<String, Object> extraParameters) {
         VisitCallbackOnSubscribe visitCallbackOnSubscribe = new VisitCallbackOnSubscribe();
         final VisitParams visitParams = VisitParams.create(visitorToken, null, extraParameters);
         updatesSubscription.add(
@@ -172,7 +172,7 @@ public class Ahoy {
         delegate.saveVisit(visitParams, visitCallbackOnSubscribe);
     }
 
-    private void saveExtraParams(final Map<String, String> extraParameters) {
+    private void saveExtraParams(final Map<String, Object> extraParameters) {
         VisitCallbackOnSubscribe visitCallbackOnSubscribe = new VisitCallbackOnSubscribe();
         final VisitParams visitParams = VisitParams.create(visitorToken, visit.visitToken(), extraParameters);
         updatesSubscription.add(
@@ -231,7 +231,7 @@ public class Ahoy {
      * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
      */
 
-    public void scheduleNewVisit(@Nullable Map<String, String> extraParams) {
+    public void scheduleNewVisit(@Nullable Map<String, Object> extraParams) {
         scheduleUpdate(System.currentTimeMillis(), new UpdateAction(true, extraParams));
     }
 
@@ -244,7 +244,7 @@ public class Ahoy {
      *
      * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
      */
-    public void scheduleSaveExtras(@Nullable Map<String, String> extraParams) {
+    public void scheduleSaveExtras(@Nullable Map<String, Object> extraParams) {
         storage.updatePendingExtraParams(extraParams);
         scheduleUpdate(System.currentTimeMillis());
     }

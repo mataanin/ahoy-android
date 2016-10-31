@@ -28,7 +28,7 @@ public class SimpleActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.new_visit:
-                AhoySingleton.scheduleNewVisit(Collections.<String, String>emptyMap());
+                AhoySingleton.scheduleNewVisit(Collections.<String, Object>emptyMap());
                 break;
             case R.id.next_utm_activity:
                 startActivity(new Intent(this, UtmActivity.class));

@@ -10,11 +10,11 @@ import java.util.Map;
 public abstract class VisitParams {
 
     public static VisitParams create(String visitorToken, @Nullable String visitToken,
-            @Nullable Map<String, String> extraParams) {
+            @Nullable Map<String, Object> extraParams) {
         return new AutoValue_VisitParams(visitToken, visitorToken, extraParams);
     }
 
     @Nullable public abstract String visitToken();
     public abstract String visitorToken();
-    @Nullable public abstract Map<String, String> extraParams();
+    @Nullable public abstract Map<String, Object> extraParams();
 }

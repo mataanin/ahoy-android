@@ -5,20 +5,21 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.support.annotation.Nullable;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class SharedPreferencesWrapper {
 
+    private final Gson gson;
     private final SharedPreferences mSharedPreferences;
 
     public SharedPreferencesWrapper(Context context, String fileName) {
         mSharedPreferences = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
-    }
-
-    private String getMapFieldKey(String mapKey, String fieldKey) {
-        return String.format("%s_%s", mapKey, fieldKey);
+        gson = new GsonBuilder().create();
     }
 
     public void delete(String key) {
@@ -79,32 +80,25 @@ public class SharedPreferencesWrapper {
         return mSharedPreferences.getString(key, defaultValue);
     }
 
-    public void putStringMap(String mapKey, @Nullable Map<String, String> map) {
-        Editor editor = mSharedPreferences.edit();
-
+    public void putStringMap(String key, @Nullable Map<String, Object> map) {
         if (map == null) {
-            editor.remove(mapKey);
+            Editor editor = mSharedPreferences.edit();
+            editor.remove(key);
             editor.apply();
             return;
         }
 
-        for (String fieldKey : map.keySet()) {
-            editor.putString(getMapFieldKey(mapKey, fieldKey), map.get(fieldKey));
-        }
-        editor.putStringSet(mapKey, map.keySet());
-        editor.commit();
+        String json = gson.toJson(map);
+        putString(key, json);
     }
 
-    public Map<String, String> getStringMap(String mapKey, String fieldDefault, Map<String, String> defaultValue) {
-        Set<String> fieldKeys = getStringSet(mapKey, null);
-        if (TypeUtil.isEmpty(fieldKeys)) {
+    public Map<String, Object> getStringMap(String key, Map<String, Object> defaultValue) {
+        String json = getString(key, null);
+        if (TypeUtil.isEmpty(json)) {
             return defaultValue;
         }
-        Map<String, String> map = new HashMap<>();
-        for (String fieldKey : fieldKeys) {
-            map.put(fieldKey, getString(getMapFieldKey(mapKey, fieldKey), fieldDefault));
-        }
-        return map;
+
+        return TypeUtil.ifNull(gson.fromJson(json, HashMap.class), defaultValue);
     }
 
     public void clear() {

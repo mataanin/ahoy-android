@@ -38,11 +38,11 @@ public class AhoySingleton {
         return RxAhoy.stream(sInstance);
     }
 
-    public static void scheduleNewVisit(Map<String, String> extraParams) {
+    public static void scheduleNewVisit(Map<String, Object> extraParams) {
         sInstance.scheduleNewVisit(extraParams);
     }
 
-    public static void scheduleSaveExtras(Map<String, String> extraParams) {
+    public static void scheduleSaveExtras(Map<String, Object> extraParams) {
         sInstance.scheduleSaveExtras(extraParams);
     }
 }

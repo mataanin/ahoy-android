@@ -32,8 +32,8 @@ class Storage {
         if (visitToken == null) {
             return null;
         }
-        Map<String, String> emptyMap = Collections.emptyMap();
-        Map<String, String> extraParams = sharedPreferences.getStringMap(VISIT_EXTRA_PARAMS, "", emptyMap);
+        Map<String, Object> emptyMap = Collections.emptyMap();
+        Map<String, Object> extraParams = sharedPreferences.getStringMap(VISIT_EXTRA_PARAMS, emptyMap);
         long visitTokenExpiration = sharedPreferences.getLong(VISIT_EXPIRATION, 0);
         return Visit.create(visitToken, extraParams, visitTokenExpiration);
     }
@@ -57,19 +57,19 @@ class Storage {
         return sharedPreferences.getString(VISITOR_TOKEN, defaultValue);
     }
 
-    public void updatePendingExtraParams(@Nullable Map<String, String> extraParams) {
+    public void updatePendingExtraParams(@Nullable Map<String, Object> extraParams) {
         if (extraParams == null) {
             sharedPreferences.putStringMap(PENDING_EXTRA_PARAMS, null);
         } else {
-            Map<String, String> params = TypeUtil.ifNull(readPendingExtraParams(null), new HashMap<String, String>());
+            Map<String, Object> params = TypeUtil.ifNull(readPendingExtraParams(null), new HashMap<String, Object>());
             params.putAll(extraParams);
             sharedPreferences.putStringMap(PENDING_EXTRA_PARAMS, params);
         }
         Log.d("foobar", "updatePendingExtraParams " + (extraParams != null ? extraParams.toString() : "null"));
     }
 
-    public Map<String, String> readPendingExtraParams(Map<String, String> defaultValue) {
-        Map<String, String> map = sharedPreferences.getStringMap(PENDING_EXTRA_PARAMS, "", defaultValue);
+    public Map<String, Object> readPendingExtraParams(Map<String, Object> defaultValue) {
+        Map<String, Object> map = sharedPreferences.getStringMap(PENDING_EXTRA_PARAMS, defaultValue);
         Log.d("foobar", "readPendingExtraParams " + (map != null ? map.toString() : "null"));
         return map;
     }
