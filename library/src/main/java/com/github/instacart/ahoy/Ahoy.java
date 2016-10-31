@@ -2,6 +2,7 @@ package com.github.instacart.ahoy;
 
 import android.app.Activity;
 import android.app.Application;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -121,9 +122,8 @@ public class Ahoy {
 
         application.registerActivityLifecycleCallbacks(new LifecycleCallbacks() {
 
-            // onResume and not onStart is used to handle a case,
-            // when data is arriving on an intent in onNewIntent method
-            @Override public void onActivityResumed(Activity activity) {
+            @Override public void onActivityCreated(Activity activity, Bundle bundle) {
+                super.onActivityCreated(activity, bundle);
                 if (!autoStart) {
                     return;
                 }
