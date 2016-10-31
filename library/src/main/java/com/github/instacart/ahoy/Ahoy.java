@@ -72,12 +72,12 @@ public class Ahoy {
             updateLock = true;
 
             if (expireVisit) {
-                saveVisit(visit != null ? visit.expire() : null);
+                saveVisit(visit.expire());
                 storage.updatePendingExtraParams(newExtraParams);
             }
             Map<String, Object> emptyMap = Collections.emptyMap();
             Map<String, Object> extraParameters = storage.readPendingExtraParams(emptyMap);
-            if (visit == null || !visit.isValid()) {
+            if (!visit.isValid()) {
                 newVisit(extraParameters);
             } else if (!TypeUtil.isEmpty(extraParameters)){
                 saveExtraParams(extraParameters);
@@ -85,7 +85,7 @@ public class Ahoy {
                 updateLock = false;
             }
 
-            if (visit != null && visit.isValid()) {
+            if (!updateLock && visit.isValid()) {
                 scheduleUpdate(visit.expiresAt());
             }
         }
@@ -128,7 +128,7 @@ public class Ahoy {
                 if (!autoStart) {
                     return;
                 }
-                scheduleUpdate(visit != null ? visit.expiresAt() : System.currentTimeMillis());
+                scheduleUpdate(visit.expiresAt());
             }
 
             @Override public void onLastOnStop() {
@@ -197,7 +197,7 @@ public class Ahoy {
         this.visit = visit;
         Log.d(TAG, "saving updated visit " + visit.toString());
         storage.saveVisit(visit);
-        if (oldVisit != null ? !oldVisit.equals(visit) : visit != null) {
+        if (!oldVisit.equals(visit)) {
             fireVisitUpdatedEvent();
         }
         scheduleUpdate(visit.expiresAt());
