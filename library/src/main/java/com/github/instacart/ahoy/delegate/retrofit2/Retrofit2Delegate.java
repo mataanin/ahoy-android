@@ -8,11 +8,11 @@ import com.github.instacart.ahoy.Visit;
 import com.github.instacart.ahoy.delegate.AhoyDelegate;
 import com.github.instacart.ahoy.delegate.VisitParams;
 import com.github.instacart.ahoy.utils.TypeUtil;
+import com.github.instacart.ahoy.utils.UtmParamsUtil;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -61,16 +61,10 @@ public class Retrofit2Delegate implements AhoyDelegate {
         request.put(Visit.OS, Visit.OS_ANDROID);
         request.put(Visit.VISIT_TOKEN, visitToken);
         request.put(Visit.VISITOR_TOKEN, visitParams.visitorToken());
-        request.putAll(visitParams.extraParams());
+        request.putAll(TypeUtil.ifNull(visitParams.extraParams(), Collections.<String, Object>emptyMap()));
 
-        Uri.Builder builder = new Uri.Builder();
-        Set<Entry<String, String>> utmParams = visitParams.utmParams().entrySet();
-        for (Map.Entry<String, String> entry : utmParams) {
-            builder = builder.appendQueryParameter(entry.getKey(), Uri.encode(entry.getValue()));
-        }
-
-        Uri landingParams = builder.build();
-        if (!TypeUtil.isEmpty(landingParams.toString())) {
+        Uri landingParams = UtmParamsUtil.utmUri(visitParams.extraParams());
+        if (landingParams != null && !TypeUtil.isEmpty(landingParams.toString())) {
             request.put(Visit.LANDING_PAGE, landingParams.toString());
         }
 
