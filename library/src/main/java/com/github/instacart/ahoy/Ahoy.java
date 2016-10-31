@@ -35,7 +35,6 @@ public class Ahoy {
 
     private final AhoyDelegate delegate;
     private final Scheduler singleThreadScheduler = Schedulers.from(Executors.newSingleThreadExecutor());
-    private volatile boolean started;
     private final Storage storage;
     private Visit visit;
     private List<VisitListener> visitListeners = new ArrayList<>();
@@ -120,14 +119,12 @@ public class Ahoy {
             storage.saveVisitorToken(visitorToken);
         }
 
-        started = autoStart;
-
         application.registerActivityLifecycleCallbacks(new LifecycleCallbacks() {
 
             // onResume and not onStart is used to handle a case,
             // when data is arriving on an intent in onNewIntent method
             @Override public void onActivityResumed(Activity activity) {
-                if (!started) {
+                if (!autoStart) {
                     return;
                 }
                 scheduleUpdate(visit != null ? visit.expiresAt() : System.currentTimeMillis());
@@ -235,7 +232,6 @@ public class Ahoy {
      */
 
     public void scheduleNewVisit(@Nullable Map<String, String> extraParams) {
-        started = true;
         scheduleUpdate(System.currentTimeMillis(), new UpdateAction(true, extraParams));
     }
 
@@ -249,7 +245,6 @@ public class Ahoy {
      * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
      */
     public void sheduleSaveExtras(@Nullable Map<String, String> extraParams) {
-        started = true;
         storage.updatePendingExtraParams(extraParams);
         scheduleUpdate(System.currentTimeMillis());
     }
