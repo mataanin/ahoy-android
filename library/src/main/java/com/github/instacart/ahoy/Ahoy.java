@@ -235,6 +235,8 @@ public class Ahoy {
      */
 
     public void scheduleNewVisit(@Nullable Map<String, Object> extraParams) {
+        visit = visit.expire();
+        storage.updatePendingExtraParams(extraParams);
         scheduleUpdate(System.currentTimeMillis(), new UpdateAction(true, extraParams));
     }
 
