@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.google.auto.value.AutoValue;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 @AutoValue
@@ -37,5 +38,11 @@ public abstract class Visit {
 
     public Visit expire() {
         return Visit.create(visitToken(), extraParams(), System.currentTimeMillis());
+    }
+
+    public Visit withUpdatedExtraParams(Map<String, String> extraParams) {
+        Map<String, String> map = new HashMap<>(extraParams());
+        map.putAll(extraParams);
+        return Visit.create(visitToken(), map, expiresAt());
     }
 }

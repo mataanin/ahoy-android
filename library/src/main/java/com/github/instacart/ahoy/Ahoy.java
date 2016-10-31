@@ -182,7 +182,7 @@ public class Ahoy {
                 Observable.create(visitCallbackOnSubscribe)
                         .subscribe(new Action1<Visit>() {
                             @Override public void call(Visit visit) {
-                                saveVisit(visit);
+                                saveVisit(visit.withUpdatedExtraParams(extraParameters));
                                 storage.updatePendingExtraParams(null);
                                 updateLock = false;
                             }
