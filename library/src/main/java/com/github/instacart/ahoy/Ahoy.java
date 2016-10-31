@@ -188,10 +188,13 @@ public class Ahoy {
     }
 
     private void saveVisit(Visit visit) {
-        Ahoy.this.visit = visit;
+        Visit oldVisit = this.visit;
+        this.visit = visit;
         Log.d(TAG, "saving updated visit " + visit.toString());
         storage.saveVisit(visit);
-        fireVisitUpdatedEvent();
+        if (oldVisit != null ? !oldVisit.equals(visit) : visit != null) {
+            fireVisitUpdatedEvent();
+        }
         scheduleUpdate(visit.expiresAt());
     }
 
