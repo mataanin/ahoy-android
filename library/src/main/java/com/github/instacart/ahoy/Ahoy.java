@@ -102,7 +102,7 @@ public class Ahoy {
         @Override public void call(Throwable throwable) {
             throwable.printStackTrace();
             updateLock = false;
-            Log.d(TAG, "failed + " + operation + " " + visitParams);
+            Log.d(TAG, "failed " + operation + " " + visitParams);
             scheduleUpdate(System.currentTimeMillis() + RETRY_DELAY);
         }
     }

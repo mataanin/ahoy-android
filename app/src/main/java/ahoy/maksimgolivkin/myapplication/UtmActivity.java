@@ -44,22 +44,19 @@ public class UtmActivity extends AppCompatActivity {
 
     @OnClick({R.id.new_visit_with_utm, R.id.save_utm_params})
     public void onClick(View view) {
-        final Map<String, String> landingUtm = new ArrayMap<>();
-        landingUtm.put(Visit.UTM_CAMPAIGN, utmCampaign.getText().toString());
-        landingUtm.put(Visit.UTM_CONTENT, utmContent.getText().toString());
-        landingUtm.put(Visit.UTM_MEDIUM, utmMedium.getText().toString());
-        landingUtm.put(Visit.UTM_SOURCE, utmSource.getText().toString());
-        landingUtm.put(Visit.UTM_TERM, utmTerm.getText().toString());
-
-        Map<String, Object> extraParams = new ArrayMap<>();
-        extraParams.put(Visit.LANDING_PAGE, landingUtm);
+        final Map<String, Object> utmParams = new ArrayMap<>();
+        utmParams.put(Visit.UTM_CAMPAIGN, utmCampaign.getText());
+        utmParams.put(Visit.UTM_CONTENT, utmContent.getText());
+        utmParams.put(Visit.UTM_MEDIUM, utmMedium.getText());
+        utmParams.put(Visit.UTM_SOURCE, utmSource.getText());
+        utmParams.put(Visit.UTM_TERM, utmTerm.getText());
 
         switch (view.getId()) {
             case R.id.save_utm_params:
-                AhoySingleton.scheduleSaveExtras(extraParams);
+                AhoySingleton.scheduleSaveExtras(utmParams);
                 break;
             case R.id.new_visit_with_utm:
-                AhoySingleton.scheduleNewVisit(extraParams);
+                AhoySingleton.scheduleNewVisit(utmParams);
                 break;
             default: break;
         }

@@ -8,7 +8,7 @@ public class TypeUtil {
     private TypeUtil() {
     }
 
-    public static boolean isEmpty(String value) {
+    public static boolean isEmpty(CharSequence value) {
         return value == null || value.length() == 0;
     }
 
