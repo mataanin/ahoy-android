@@ -174,7 +174,7 @@ public class Ahoy {
 
     private void saveExtraParams(final Map<String, Object> extraParameters) {
         VisitCallbackOnSubscribe visitCallbackOnSubscribe = new VisitCallbackOnSubscribe();
-        final VisitParams visitParams = VisitParams.create(visitorToken, visit.visitToken(), extraParameters);
+        final VisitParams visitParams = VisitParams.create(visitorToken, visit, extraParameters);
         updatesSubscription.add(
                 Observable.create(visitCallbackOnSubscribe)
                         .subscribe(new Action1<Visit>() {

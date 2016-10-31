@@ -27,10 +27,7 @@ import static java.util.UUID.randomUUID;
 
 public class Retrofit2Delegate implements AhoyDelegate {
 
-    private static final String TAG = "retrofit-delegate";
-
     private static final long VISIT_DURATION = TimeUnit.MILLISECONDS.convert(15, TimeUnit.SECONDS);
-    private final ApiRetrofit2 api;
 
     private static final String[] utmParams = {
             Visit.UTM_CAMPAIGN,
@@ -39,6 +36,8 @@ public class Retrofit2Delegate implements AhoyDelegate {
             Visit.UTM_SOURCE,
             Visit.UTM_TERM
     };
+
+    private final ApiRetrofit2 api;
 
     public Retrofit2Delegate(String baseUrl, boolean loggingEnabled) {
         ObjectMapper mapper = new ObjectMapper();
@@ -113,7 +112,7 @@ public class Retrofit2Delegate implements AhoyDelegate {
     }
 
     @Override public void saveExtras(VisitParams visitParams, Callback callback) {
-        String visitToken = visitParams.visitToken();
+        String visitToken = visitParams.visit() != null ? visitParams.visit().visitToken() : null;
         if (TypeUtil.isEmpty(visitToken) || TypeUtil.isEmpty(visitParams.visitorToken())) {
             throw new IllegalArgumentException("Please provide visit & visitor token");
         }
