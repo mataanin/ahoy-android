@@ -27,10 +27,10 @@ class Storage {
         sharedPreferences = new SharedPreferencesWrapper(application, AHOY_PREFERENCES_FILE);
     }
 
-    @Nullable public Visit readVisit() {
+    public Visit readVisit(Visit defaultValue) {
         String visitToken = sharedPreferences.getString(VISIT_TOKEN, null);
         if (visitToken == null) {
-            return null;
+            return defaultValue;
         }
         Map<String, Object> emptyMap = Collections.emptyMap();
         Map<String, Object> extraParams = sharedPreferences.getStringMap(VISIT_EXTRA_PARAMS, emptyMap);

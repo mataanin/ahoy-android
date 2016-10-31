@@ -3,6 +3,7 @@ package com.github.instacart.ahoy;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -112,7 +113,7 @@ public class Ahoy {
         this.delegate = delegate;
 
         storage = new Storage(application);
-        visit = storage.readVisit();
+        visit = storage.readVisit(Visit.empty());
         visitorToken = storage.readVisitorToken(null);
 
         if (TextUtils.isEmpty(visitorToken)) {
@@ -188,6 +189,10 @@ public class Ahoy {
     }
 
     private void saveVisit(Visit visit) {
+        if (visit == null) {
+            throw new IllegalArgumentException("visit can't be null");
+        }
+
         Visit oldVisit = this.visit;
         this.visit = visit;
         Log.d(TAG, "saving updated visit " + visit.toString());
@@ -208,7 +213,7 @@ public class Ahoy {
         }
     }
 
-    @Nullable public Visit getVisit() {
+    @NonNull public Visit getVisit() {
         return visit;
     }
 

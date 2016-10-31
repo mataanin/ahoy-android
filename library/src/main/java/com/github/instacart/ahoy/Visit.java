@@ -47,4 +47,8 @@ public abstract class Visit {
         map.putAll(extraParams);
         return Visit.create(visitToken(), map, expiresAt());
     }
+
+    public static Visit empty() {
+        return create("", Collections.<String, Object>emptyMap(), 0);
+    }
 }

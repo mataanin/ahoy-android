@@ -1,11 +1,13 @@
 package com.github.instacart.ahoy.delegate;
 
+import android.support.annotation.NonNull;
+
 import com.github.instacart.ahoy.Visit;
 
 public interface AhoyDelegate {
 
     interface Callback {
-        void onSuccess(Visit visit);
+        void onSuccess(@NonNull Visit visit);
         void onFailure(Throwable throwable);
     }
 
