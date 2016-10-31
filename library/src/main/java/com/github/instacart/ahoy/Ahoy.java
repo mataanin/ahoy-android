@@ -7,7 +7,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.github.instacart.ahoy.delegate.AhoyDelegate;
+import com.github.instacart.ahoy.delegate.VisitCallbackOnSubscribe;
 import com.github.instacart.ahoy.delegate.VisitParams;
+import com.github.instacart.ahoy.utils.LifecycleCallbacks;
 import com.github.instacart.ahoy.utils.TypeUtil;
 
 import java.util.ArrayList;

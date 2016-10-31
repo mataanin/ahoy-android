@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Storage {
+class Storage {
 
     private static final String AHOY_PREFERENCES_FILE = "ahoy.prefs";
 

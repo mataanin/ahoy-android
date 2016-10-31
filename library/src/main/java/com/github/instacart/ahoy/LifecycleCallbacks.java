@@ -4,7 +4,7 @@ import android.app.Activity;
 
 import com.github.instacart.ahoy.utils.ActivityLifecycleCallbacksStub;
 
-public abstract class LifecycleCallbacks extends ActivityLifecycleCallbacksStub {
+abstract class LifecycleCallbacks extends ActivityLifecycleCallbacksStub {
 
     private int visibleActivitiesCounter = 0;
 
