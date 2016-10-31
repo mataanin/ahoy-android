@@ -132,9 +132,7 @@ public class Ahoy {
             }
 
             @Override public void onLastOnStop() {
-                updatesSubscription.clear();
-                scheduledSubscriptions.clear();
-                updateLock = false;
+                shutdown();
             }
         });
     }
@@ -257,5 +255,11 @@ public class Ahoy {
     public void scheduleSaveExtras(@Nullable Map<String, Object> extraParams) {
         storage.updatePendingExtraParams(extraParams);
         scheduleUpdate(System.currentTimeMillis());
+    }
+
+    public void shutdown() {
+        updatesSubscription.clear();
+        scheduledSubscriptions.clear();
+        updateLock = false;
     }
 }
