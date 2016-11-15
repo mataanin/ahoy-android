@@ -260,4 +260,12 @@ public class Ahoy {
         scheduledSubscriptions.clear();
         updateLock = false;
     }
+
+    public Visit getVisit() {
+        return visit;
+    }
+
+    public String getVisitorToken() {
+        return visitorToken;
+    }
 }

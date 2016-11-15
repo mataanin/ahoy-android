@@ -5,20 +5,22 @@ import android.support.annotation.Nullable;
 
 import com.github.instacart.ahoy.Visit;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 public class UtmUtil {
 
-    private static final String[] utmParams = {
+    public static final List<String> UTM_PARAMS = Arrays.asList(
             Visit.UTM_CAMPAIGN,
             Visit.UTM_CONTENT,
             Visit.UTM_MEDIUM,
             Visit.UTM_SOURCE,
             Visit.UTM_TERM
-    };
+    );
 
     private UtmUtil() {
     }
@@ -28,7 +30,7 @@ public class UtmUtil {
             return null;
         }
         Map<String, String> map = new HashMap<>();
-        for (String key : utmParams) {
+        for (String key : UTM_PARAMS) {
             if (!params.containsKey(key)) {
                 continue;
             }
