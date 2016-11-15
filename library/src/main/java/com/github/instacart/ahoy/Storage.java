@@ -1,14 +1,10 @@
 package com.github.instacart.ahoy;
 
 import android.app.Application;
-import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.github.instacart.ahoy.utils.SharedPreferencesWrapper;
-import com.github.instacart.ahoy.utils.TypeUtil;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 class Storage {
@@ -19,7 +15,6 @@ class Storage {
     private static final String VISIT_EXTRA_PARAMS = "visit extra params";
     private static final String VISITOR_TOKEN = "visitor token";
     private static final String VISIT_EXPIRATION = "visit expiration";
-    private static final String PENDING_EXTRA_PARAMS = "pending extra params";
 
     private final SharedPreferencesWrapper sharedPreferences;
 
@@ -41,10 +36,12 @@ class Storage {
     public void saveVisit(Visit visit) {
         if (visit == null) {
             sharedPreferences.delete(VISIT_EXPIRATION);
+            sharedPreferences.delete(VISIT_EXTRA_PARAMS);
             sharedPreferences.delete(VISIT_TOKEN);
             return;
         }
 
+        sharedPreferences.putStringMap(VISIT_EXTRA_PARAMS, visit.extraParams());
         sharedPreferences.putLong(VISIT_EXPIRATION, visit.expiresAt());
         sharedPreferences.putString(VISIT_TOKEN, visit.visitToken());
     }
@@ -55,22 +52,5 @@ class Storage {
 
     public String readVisitorToken(String defaultValue) {
         return sharedPreferences.getString(VISITOR_TOKEN, defaultValue);
-    }
-
-    public void updatePendingExtraParams(@Nullable Map<String, Object> extraParams) {
-        if (extraParams == null) {
-            sharedPreferences.putStringMap(PENDING_EXTRA_PARAMS, null);
-        } else {
-            Map<String, Object> params = TypeUtil.ifNull(readPendingExtraParams(null), new HashMap<String, Object>());
-            params.putAll(extraParams);
-            sharedPreferences.putStringMap(PENDING_EXTRA_PARAMS, params);
-        }
-        Log.d("foobar", "updatePendingExtraParams " + (extraParams != null ? extraParams.toString() : "null"));
-    }
-
-    public Map<String, Object> readPendingExtraParams(Map<String, Object> defaultValue) {
-        Map<String, Object> map = sharedPreferences.getStringMap(PENDING_EXTRA_PARAMS, defaultValue);
-        Log.d("foobar", "readPendingExtraParams " + (map != null ? map.toString() : "null"));
-        return map;
     }
 }

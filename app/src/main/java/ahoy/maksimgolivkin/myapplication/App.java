@@ -9,6 +9,7 @@ public class App extends Application {
 
     @Override public void onCreate() {
         super.onCreate();
-        AhoySingleton.init(this, new Retrofit2Delegate("http://192.168.1.17:3000", true), true);
+        AhoySingleton.init(this, new Retrofit2Delegate("http://192.168.1.34:3000", true),
+                true);
     }
 }

@@ -10,10 +10,9 @@ import android.util.Log;
 
 import com.github.instacart.ahoy.delegate.AhoyDelegate;
 import com.github.instacart.ahoy.delegate.VisitParams;
-import com.github.instacart.ahoy.utils.TypeUtil;
+import com.google.auto.value.AutoValue;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -21,16 +20,16 @@ import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Scheduler;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
+import static com.github.instacart.ahoy.Ahoy.Request.Type.NEW_VISIT;
+import static com.github.instacart.ahoy.Ahoy.Request.Type.UPDATE;
+
 public class Ahoy {
 
     private static final String TAG = "ahoy";
-
-    private static final long RETRY_DELAY = 2000;
 
     private CompositeSubscription scheduledSubscriptions = new CompositeSubscription();
     private CompositeSubscription updatesSubscription = new CompositeSubscription();
@@ -42,70 +41,34 @@ public class Ahoy {
     private List<VisitListener> visitListeners = new ArrayList<>();
     private String visitorToken;
 
+    private ArrayList<Request> updateQueue = new ArrayList<>();
+
     private volatile boolean updateLock = false;
 
     public interface VisitListener {
         void onVisitUpdated(Visit visit);
     }
 
-    private class UpdateAction implements Action0 {
+    @AutoValue
+    public static abstract class Request {
 
-        private boolean expireVisit;
-        private Map<String, Object> newExtraParams;
-
-        public UpdateAction() {
+        enum Type {
+            NEW_VISIT, UPDATE;
         }
 
-        public UpdateAction(boolean epxireVisit, Map<String, Object> newVisitExtraParams) {
-            this.expireVisit = epxireVisit;
-            this.newExtraParams = newVisitExtraParams;
+        public static Request newVisit(VisitParams visitParams) {
+            return new AutoValue_Ahoy_Request(NEW_VISIT, visitParams);
         }
 
-        @Override public void call() {
-
-            Log.d(TAG, "running scheduled update");
-            if (updateLock) {
-                scheduleUpdate(System.currentTimeMillis() + RETRY_DELAY);
-                return;
-            }
-
-            updateLock = true;
-
-            if (expireVisit) {
-                saveVisit(visit.expire());
-                storage.updatePendingExtraParams(newExtraParams);
-            }
-            Map<String, Object> emptyMap = Collections.emptyMap();
-            Map<String, Object> extraParameters = storage.readPendingExtraParams(emptyMap);
-            if (!visit.isValid()) {
-                newVisit(extraParameters);
-            } else if (!TypeUtil.isEmpty(extraParameters)){
-                saveExtraParams(extraParameters);
-            } else {
-                updateLock = false;
-            }
-
-            if (!updateLock && visit.isValid()) {
-                scheduleUpdate(visit.expiresAt());
-            }
-        }
-    }
-
-    private class FailureAction implements Action1<Throwable> {
-
-        private final String operation;
-        private final VisitParams visitParams;
-
-        public FailureAction(String operation, VisitParams visitParams) {
-            this.operation = operation;
-            this.visitParams = visitParams;
+        public static Request update(VisitParams visitParams) {
+            return new AutoValue_Ahoy_Request(UPDATE, visitParams);
         }
 
-        @Override public void call(Throwable throwable) {
-            throwable.printStackTrace();
-            updateLock = false;
-            Log.d(TAG, "failed " + operation + " " + visitParams);
-            scheduleUpdate(System.currentTimeMillis() + RETRY_DELAY);
+        public abstract Type getType();
+        public abstract VisitParams getVisitParams();
+
+        public boolean isNewVisit() {
+            return NEW_VISIT.equals(getType());
         }
     }
 
@@ -128,7 +91,15 @@ public class Ahoy {
                 if (!autoStart) {
                     return;
                 }
-                scheduleUpdate(visit.expiresAt());
+                scheduleUpdate(System.currentTimeMillis());
+            }
+
+            @Override public void onActivityStarted(Activity activity) {
+                super.onActivityStarted(activity);
+                if (!autoStart) {
+                    return;
+                }
+                scheduleUpdate(System.currentTimeMillis());
             }
 
             @Override public void onLastOnStop() {
@@ -138,10 +109,6 @@ public class Ahoy {
     }
 
     private void scheduleUpdate(long timestamp) {
-        scheduleUpdate(timestamp, new UpdateAction());
-    }
-
-    private void scheduleUpdate(long timestamp, final Action0 update) {
         scheduledSubscriptions.clear();
         final long delay = Math.max(timestamp - System.currentTimeMillis(), 0);
         Log.d(TAG, String.format("schedule update with delay %d at %d", delay, System.currentTimeMillis()));
@@ -150,41 +117,68 @@ public class Ahoy {
                         .observeOn(singleThreadScheduler)
                         .subscribe(new Action1<Long>() {
                             @Override public void call(Long aLong) {
-                                Log.d(TAG, String.format("called at %d", System.currentTimeMillis()));
-                                update.call();
+                                Log.d(TAG, String.format("update at %d", System.currentTimeMillis()));
+                                if (!visit.isValid()) {
+                                    enqueueExpiredVisitUpdate();
+                                }
+                                processQueue();
                             }
                         }));
     }
 
-    private void newVisit(final Map<String, Object> extraParameters) {
-        VisitCallbackOnSubscribe visitCallbackOnSubscribe = new VisitCallbackOnSubscribe();
-        final VisitParams visitParams = VisitParams.create(visitorToken, null, extraParameters);
-        updatesSubscription.add(
-                Observable.create(visitCallbackOnSubscribe)
-                        .subscribe(new Action1<Visit>() {
-                            @Override public void call(Visit visit) {
-                                saveVisit(visit);
-                                storage.updatePendingExtraParams(null);
-                                updateLock = false;
-                            }
-                        }, new FailureAction("on new visit", visitParams)));
-        delegate.saveVisit(visitParams, visitCallbackOnSubscribe);
+    private void enqueueExpiredVisitUpdate() {
+        synchronized (updateQueue) {
+            for (Request request : updateQueue) {
+                if (request.isNewVisit()) {
+                    return;
+                }
+            }
+            updateQueue.add(Request.newVisit(VisitParams.create(visitorToken, null, null)));
+        }
     }
 
-    private void saveExtraParams(final Map<String, Object> extraParameters) {
-        VisitCallbackOnSubscribe visitCallbackOnSubscribe = new VisitCallbackOnSubscribe();
-        final VisitParams visitParams = VisitParams.create(visitorToken, visit, extraParameters);
-        updatesSubscription.add(
-                Observable.create(visitCallbackOnSubscribe)
-                        .subscribe(new Action1<Visit>() {
-                            @Override public void call(Visit visit) {
-                                saveVisit(visit.withUpdatedExtraParams(extraParameters));
-                                storage.updatePendingExtraParams(null);
-                                updateLock = false;
-                            }
-                        }, new FailureAction("saving extra parameters", visitParams)));
-        delegate.saveExtras(visitParams, visitCallbackOnSubscribe);
+    private void processQueue() {
+        if (updateLock) {
+            return;
+        }
+        updateLock = true;
+
+        synchronized (updateQueue) {
+
+            if (updateQueue.size() == 0) {
+                updateLock = false;
+                return;
+            }
+
+            final Request request = updateQueue.get(0);
+
+            VisitCallbackOnSubscribe visitCallbackOnSubscribe = new VisitCallbackOnSubscribe();
+            updatesSubscription.add(
+                    Observable.create(visitCallbackOnSubscribe)
+                            .subscribe(new Action1<Visit>() {
+                                @Override public void call(Visit visit) {
+                                    saveVisit(visit);
+                                    synchronized (updateQueue) {
+                                        updateQueue.remove(0);
+                                    }
+                                    updateLock = false;
+                                }
+                            }, new Action1<Throwable>() {
+                                @Override public void call(Throwable throwable) {
+                                    throwable.printStackTrace();
+                                    updateLock = false;
+                                    Log.d(TAG, "failed " + request.getType() + " " + request.getVisitParams());
+                                }
+                            }));
+
+            if (request.isNewVisit()) {
+                delegate.saveVisit(request.getVisitParams(), visitCallbackOnSubscribe);
+            } else {
+                delegate.saveVisit(request.getVisitParams(), visitCallbackOnSubscribe);
+            }
+        }
     }
+
 
     private void saveVisit(Visit visit) {
         if (visit == null) {
@@ -239,8 +233,10 @@ public class Ahoy {
 
     public void scheduleNewVisit(@Nullable Map<String, Object> extraParams) {
         visit = visit.expire();
-        storage.updatePendingExtraParams(extraParams);
-        scheduleUpdate(System.currentTimeMillis(), new UpdateAction(true, extraParams));
+        synchronized (updateQueue) {
+            updateQueue.add(Request.newVisit(VisitParams.create(visitorToken, null, extraParams)));
+        }
+        scheduleUpdate(System.currentTimeMillis());
     }
 
     /**
@@ -253,7 +249,9 @@ public class Ahoy {
      * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
      */
     public void scheduleSaveExtras(@Nullable Map<String, Object> extraParams) {
-        storage.updatePendingExtraParams(extraParams);
+        synchronized (updateQueue) {
+            updateQueue.add(Request.update(VisitParams.create(visitorToken, null, extraParams)));
+        }
         scheduleUpdate(System.currentTimeMillis());
     }
 

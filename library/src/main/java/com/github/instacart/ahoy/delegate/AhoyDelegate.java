@@ -19,7 +19,7 @@ public interface AhoyDelegate {
     String newVisitorToken();
 
     /**
-     * Start a new visit and save extra parameters.
+     * Always start a new visit with extra parameters.
      *
      * @param params Visit information & extra parameters (such as utm parameters, see {@link Visit}).
      * @param callback Callback reporting success or failure & returning new visit.
@@ -27,7 +27,7 @@ public interface AhoyDelegate {
     void saveVisit(VisitParams params, Callback callback);
 
     /**
-     * Save extra parameters and optionally start a new visit.
+     * Save extra parameters. Visit may or may not be started.
      *
      * @param params Visit information & extra parameters (such as utm parameters, see {@link Visit}).
      * @param callback Callback reporting success or failure & returning updated or new visit.

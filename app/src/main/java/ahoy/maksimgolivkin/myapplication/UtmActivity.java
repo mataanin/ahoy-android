@@ -1,5 +1,6 @@
 package ahoy.maksimgolivkin.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.app.AppCompatActivity;
@@ -57,6 +58,9 @@ public class UtmActivity extends AppCompatActivity {
                 break;
             case R.id.new_visit_with_utm:
                 AhoySingleton.scheduleNewVisit(utmParams);
+                break;
+            case R.id.next_utm_activity:
+                startActivity(new Intent(this, UtmActivity.class));
                 break;
             default: break;
         }

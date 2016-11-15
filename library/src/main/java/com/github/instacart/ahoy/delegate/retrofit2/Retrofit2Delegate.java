@@ -74,7 +74,9 @@ public class Retrofit2Delegate implements AhoyDelegate {
                 .subscribe(new Action1<VisitResponse>() {
                     @Override public void call(VisitResponse visitResponse) {
                         long expiresAt = System.currentTimeMillis() + VISIT_DURATION;
-                        callback.onSuccess(Visit.create(visitResponse.visitId(), visitParams.extraParams(), expiresAt));
+                        Map<String, Object> extraParams
+                                = TypeUtil.ifNull(visitParams.extraParams(), Collections.<String, Object>emptyMap());
+                        callback.onSuccess(Visit.create(visitResponse.visitId(), extraParams, expiresAt));
                     }
                 }, new Action1<Throwable>() {
                     @Override public void call(Throwable throwable) {
@@ -90,7 +92,7 @@ public class Retrofit2Delegate implements AhoyDelegate {
     @Override public void saveVisit(VisitParams visitParams, Callback callback) {
         final String visitorToken = visitParams.visitorToken();
         if (TypeUtil.isEmpty(visitorToken)) {
-            throw new IllegalArgumentException("Please provide visit & visitor token");
+            throw new IllegalArgumentException("Please provide visitor token");
         }
 
         String visitToken = UUID.randomUUID().toString();
