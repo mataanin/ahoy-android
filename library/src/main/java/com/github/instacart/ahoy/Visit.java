@@ -2,6 +2,7 @@ package com.github.instacart.ahoy;
 
 import android.support.annotation.NonNull;
 
+import com.github.instacart.ahoy.utils.TypeUtil;
 import com.google.auto.value.AutoValue;
 
 import java.util.Collections;
@@ -25,8 +26,10 @@ public abstract class Visit {
     public static final String UTM_MEDIUM = "utm_medium";
     public static final String UTM_SOURCE = "utm_source";
     public static final String UTM_TERM = "utm_term";
+    public static final String PLATFORM = "platform";
 
     public static Visit create(String visitToken, @NonNull Map<String, Object> extraParams, long expiresAt) {
+        extraParams = TypeUtil.ifNull(extraParams, Collections.<String, Object>emptyMap());
         return new AutoValue_Visit(visitToken, Collections.unmodifiableMap(extraParams), expiresAt);
     }
 

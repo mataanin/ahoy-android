@@ -30,6 +30,7 @@ import static com.github.instacart.ahoy.Ahoy.Request.Type.UPDATE;
 public class Ahoy {
 
     private static final String TAG = "ahoy";
+    private static final long RETRY_DELAY = 1000;
 
     private CompositeSubscription scheduledSubscriptions = new CompositeSubscription();
     private CompositeSubscription updatesSubscription = new CompositeSubscription();
@@ -147,6 +148,7 @@ public class Ahoy {
 
             if (updateQueue.size() == 0) {
                 updateLock = false;
+                scheduleUpdate(visit.expiresAt());
                 return;
             }
 
@@ -162,19 +164,21 @@ public class Ahoy {
                                         updateQueue.remove(0);
                                     }
                                     updateLock = false;
+                                    scheduleUpdate(0);
                                 }
                             }, new Action1<Throwable>() {
                                 @Override public void call(Throwable throwable) {
                                     throwable.printStackTrace();
                                     updateLock = false;
                                     Log.d(TAG, "failed " + request.getType() + " " + request.getVisitParams());
+                                    scheduleUpdate(System.currentTimeMillis() + RETRY_DELAY);
                                 }
                             }));
 
             if (request.isNewVisit()) {
                 delegate.saveVisit(request.getVisitParams(), visitCallbackOnSubscribe);
             } else {
-                delegate.saveVisit(request.getVisitParams(), visitCallbackOnSubscribe);
+                delegate.saveExtras(request.getVisitParams(), visitCallbackOnSubscribe);
             }
         }
     }
@@ -192,7 +196,6 @@ public class Ahoy {
         if (!oldVisit.equals(visit)) {
             fireVisitUpdatedEvent();
         }
-        scheduleUpdate(visit.expiresAt());
     }
 
     private void fireVisitUpdatedEvent() {
@@ -230,12 +233,24 @@ public class Ahoy {
      *
      * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
      */
-
-    public void scheduleNewVisit(@Nullable Map<String, Object> extraParams) {
+    public void newVisit(@Nullable Map<String, Object> extraParams) {
         visit = visit.expire();
         synchronized (updateQueue) {
             updateQueue.add(Request.newVisit(VisitParams.create(visitorToken, null, extraParams)));
         }
+        scheduleUpdate(System.currentTimeMillis());
+    }
+
+    /**
+     * Save visit with the provided extra parameters. If a visit was already saved, new visit is started
+     * <p>
+     * New values for the same keys, override stored parameters.
+     * <p>
+     * the {@link AhoyDelegate}.
+     *
+     * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
+     */
+    public void ensureFreshVisit(@Nullable Map<String, Object> extraParams) {
         scheduleUpdate(System.currentTimeMillis());
     }
 
@@ -248,9 +263,9 @@ public class Ahoy {
      *
      * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
      */
-    public void scheduleSaveExtras(@Nullable Map<String, Object> extraParams) {
+    public void saveExtras(@Nullable Map<String, Object> extraParams) {
         synchronized (updateQueue) {
-            updateQueue.add(Request.update(VisitParams.create(visitorToken, null, extraParams)));
+            updateQueue.add(Request.update(VisitParams.create(visitorToken, visit, extraParams)));
         }
         scheduleUpdate(System.currentTimeMillis());
     }
