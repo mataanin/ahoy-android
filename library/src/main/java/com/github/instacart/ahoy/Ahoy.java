@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.github.instacart.ahoy.delegate.AhoyDelegate;
 import com.github.instacart.ahoy.delegate.VisitParams;
@@ -23,6 +22,7 @@ import rx.Scheduler;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 import static com.github.instacart.ahoy.Ahoy.Request.Type.NEW_VISIT;
 import static com.github.instacart.ahoy.Ahoy.Request.Type.UPDATE;
@@ -45,6 +45,7 @@ public class Ahoy {
     private ArrayList<Request> updateQueue = new ArrayList<>();
 
     private volatile boolean updateLock = false;
+    private boolean shutdown;
 
     public interface VisitListener {
         void onVisitUpdated(Visit visit);
@@ -54,7 +55,7 @@ public class Ahoy {
     public static abstract class Request {
 
         enum Type {
-            NEW_VISIT, UPDATE;
+            NEW_VISIT, UPDATE
         }
 
         public static Request newVisit(VisitParams visitParams) {
@@ -89,7 +90,7 @@ public class Ahoy {
 
             @Override public void onActivityCreated(Activity activity, Bundle bundle) {
                 super.onActivityCreated(activity, bundle);
-                if (!autoStart) {
+                if (!autoStart || shutdown) {
                     return;
                 }
                 scheduleUpdate(System.currentTimeMillis());
@@ -97,14 +98,16 @@ public class Ahoy {
 
             @Override public void onActivityStarted(Activity activity) {
                 super.onActivityStarted(activity);
-                if (!autoStart) {
+                if (!autoStart || shutdown) {
                     return;
                 }
                 scheduleUpdate(System.currentTimeMillis());
             }
 
             @Override public void onLastOnStop() {
-                shutdown();
+                updatesSubscription.clear();
+                scheduledSubscriptions.clear();
+                updateLock = false;
             }
         });
     }
@@ -112,13 +115,13 @@ public class Ahoy {
     private void scheduleUpdate(long timestamp) {
         scheduledSubscriptions.clear();
         final long delay = Math.max(timestamp - System.currentTimeMillis(), 0);
-        Log.d(TAG, String.format("schedule update with delay %d at %d", delay, System.currentTimeMillis()));
+        Timber.tag(TAG).d(String.format("schedule update with delay %d at %d", delay, System.currentTimeMillis()));
         scheduledSubscriptions.add(
                 Observable.timer(delay, TimeUnit.MILLISECONDS)
                         .observeOn(singleThreadScheduler)
                         .subscribe(new Action1<Long>() {
                             @Override public void call(Long aLong) {
-                                Log.d(TAG, String.format("update at %d", System.currentTimeMillis()));
+                                Timber.tag(TAG).d(String.format("update at %d", System.currentTimeMillis()));
                                 if (!visit.isValid()) {
                                     enqueueExpiredVisitUpdate();
                                 }
@@ -170,7 +173,7 @@ public class Ahoy {
                                 @Override public void call(Throwable throwable) {
                                     throwable.printStackTrace();
                                     updateLock = false;
-                                    Log.d(TAG, "failed " + request.getType() + " " + request.getVisitParams());
+                                    Timber.tag(TAG).d("failed " + request.getType() + " " + request.getVisitParams());
                                     scheduleUpdate(System.currentTimeMillis() + RETRY_DELAY);
                                 }
                             }));
@@ -191,7 +194,7 @@ public class Ahoy {
 
         Visit oldVisit = this.visit;
         this.visit = visit;
-        Log.d(TAG, "saving updated visit " + visit.toString());
+        Timber.tag(TAG).d("saving updated visit " + visit.toString());
         storage.saveVisit(visit);
         if (!oldVisit.equals(visit)) {
             fireVisitUpdatedEvent();
@@ -234,6 +237,9 @@ public class Ahoy {
      * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
      */
     public void newVisit(@Nullable Map<String, Object> extraParams) {
+        if (shutdown) {
+            throw new IllegalArgumentException("Ahoy has been shutdownAndClear");
+        }
         visit = visit.expire();
         synchronized (updateQueue) {
             updateQueue.add(Request.newVisit(VisitParams.create(visitorToken, null, extraParams)));
@@ -251,6 +257,9 @@ public class Ahoy {
      * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
      */
     public void ensureFreshVisit(@Nullable Map<String, Object> extraParams) {
+        if (shutdown) {
+            throw new IllegalArgumentException("Ahoy has been shutdownAndClear");
+        }
         scheduleUpdate(System.currentTimeMillis());
     }
 
@@ -264,16 +273,21 @@ public class Ahoy {
      * @param extraParams Extra parameters passed to {@link AhoyDelegate}. Null will saved parameters.
      */
     public void saveExtras(@Nullable Map<String, Object> extraParams) {
+        if (shutdown) {
+            throw new IllegalArgumentException("Ahoy has been shutdownAndClear");
+        }
+
         synchronized (updateQueue) {
             updateQueue.add(Request.update(VisitParams.create(visitorToken, visit, extraParams)));
         }
         scheduleUpdate(System.currentTimeMillis());
     }
 
-    public void shutdown() {
+    public void shutdownAndClear() {
+        storage.clear();
         updatesSubscription.clear();
         scheduledSubscriptions.clear();
-        updateLock = false;
+        shutdown = true;
     }
 
     public Visit getVisit() {
