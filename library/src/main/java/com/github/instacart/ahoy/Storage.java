@@ -1,6 +1,7 @@
 package com.github.instacart.ahoy;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.github.instacart.ahoy.utils.SharedPreferencesWrapper;
 
@@ -52,5 +53,9 @@ class Storage {
 
     public String readVisitorToken(String defaultValue) {
         return sharedPreferences.getString(VISITOR_TOKEN, defaultValue);
+    }
+
+    public void clear() {
+        sharedPreferences.clear();
     }
 }

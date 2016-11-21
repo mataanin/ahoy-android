@@ -104,6 +104,6 @@ public class SharedPreferencesWrapper {
     public void clear() {
         SharedPreferences.Editor edit = mSharedPreferences.edit();
         edit.clear();
-        edit.apply();
+        edit.commit();
     }
 }
